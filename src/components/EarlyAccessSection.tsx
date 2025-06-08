@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { sendEmailToSubscriber } from '@/utils/emailService';
 
 const EarlyAccessSection: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,15 +19,15 @@ const EarlyAccessSection: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email.trim()) {
+    if (!email) {
       setIsError(true);
-      setErrorMessage('Por favor, informe seu email');
+      setErrorMessage('Por favor, insira seu email.');
       return;
     }
-    
+
     if (!validateEmail(email)) {
       setIsError(true);
-      setErrorMessage('Por favor, informe um email válido');
+      setErrorMessage('Por favor, insira um email válido.');
       return;
     }
 
@@ -35,6 +36,7 @@ const EarlyAccessSection: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // Primeira etapa: Validar e-mail e obter o nome formatado do servidor
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
@@ -46,13 +48,23 @@ const EarlyAccessSection: React.FC = () => {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao enviar o email');
+        throw new Error(data.error || 'Erro ao processar o email');
       }
       
-      if (data.userName) {
-        setUserName(data.userName);
+      // Obter o nome formatado do servidor
+      const formattedName = data.userName || email.split('@')[0];
+      setUserName(formattedName);
+      
+      // Segunda etapa: Enviar e-mail através do EmailJS diretamente do cliente
+      const emailResult = await sendEmailToSubscriber(email, formattedName);
+      
+      if (!emailResult.success) {
+        console.warn('O email foi registrado, mas pode não ter sido enviado:', emailResult.error);
+      } else {
+        console.log('Email enviado com sucesso via EmailJS!');
       }
       
+      // Atualizar a interface informando que o email foi enviado com sucesso
       setIsSubmitted(true);
       
       setTimeout(() => {

@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import emailjs from '@emailjs/browser';
 
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_xol2mne";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_wtf4dzc";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "5Ys2OtrDM9Y8aha4P"; 
 
 export async function POST(request: Request) {
   try {
@@ -22,35 +18,15 @@ export async function POST(request: Request) {
       .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
 
-    const templateParams = {
-      to_email: email,
-      to_name: formattedName,
-      from_name: "Equipe Maestro",
-      message: `Olá ${formattedName}, agradecemos por se inscrever no beta do Maestro. Você será notificado em breve com acesso antecipado.`,
-      subject: `Bem-vindo ao Beta do Maestro, ${formattedName}!`
-    };
-
+   
     console.log(`Email armazenado: ${email}`);
     
-    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
-      try {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          templateParams,
-          EMAILJS_PUBLIC_KEY
-        );
-      } catch (emailError) {
-        console.error("Erro ao enviar email via EmailJS:", emailError);
-      }
-    } else {
-      console.log("Configuração de EmailJS não detectada - modo simulação");
-      console.log(`Enviaria email para: ${email}`);
-      console.log(`Assunto: Bem-vindo ao Beta do Maestro, ${formattedName}!`);
-      console.log(`Corpo: Olá ${formattedName}, agradecemos por se inscrever no beta do Maestro.`);
+    console.log(`Email registrado com sucesso: ${email}`);
+    console.log(`Nome formatado: ${formattedName}`);
+    console.log(`Simulando envio de email para: ${email}`);
+    console.log(`Assunto: Bem-vindo ao Beta do Maestro, ${formattedName}!`);
       
-      await new Promise(resolve => setTimeout(resolve, 800));
-    }
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     return NextResponse.json({
       success: true,
@@ -66,7 +42,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Função para validar o formato do email
 function validateEmail(email: string): boolean {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
