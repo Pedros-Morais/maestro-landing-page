@@ -1,7 +1,6 @@
 "use client"
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { sendEmailToSubscriber } from '@/utils/emailService';
 
 const EarlyAccessSection: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -19,52 +18,33 @@ const EarlyAccessSection: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
-      setIsError(true);
-      setErrorMessage('Por favor, insira seu email.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
+    // Validar email
+    if (!email || !email.includes('@')) {
       setIsError(true);
       setErrorMessage('Por favor, insira um email válido.');
       return;
     }
-
-    setIsError(false);
-    setErrorMessage('');
+    
     setIsSubmitting(true);
+    setIsError(false);
     
     try {
-      // Primeira etapa: Validar e-mail e obter o nome formatado do servidor
+      // Enviar para o backend para validação e formato
       const response = await fetch('/api/subscribe', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao processar o email');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro na inscrição');
       }
       
-      // Obter o nome formatado do servidor
-      const formattedName = data.userName || email.split('@')[0];
-      setUserName(formattedName);
+      const data = await response.json();
+      setUserName(data.userName || 'usuário');
       
-      // Segunda etapa: Enviar e-mail através do EmailJS diretamente do cliente
-      const emailResult = await sendEmailToSubscriber(email, formattedName);
-      
-      if (!emailResult.success) {
-        console.warn('O email foi registrado, mas pode não ter sido enviado:', emailResult.error);
-      } else {
-        console.log('Email enviado com sucesso via EmailJS!');
-      }
-      
-      // Atualizar a interface informando que o email foi enviado com sucesso
+      // Apenas atualizar a interface informando que o email foi adicionado como lead
       setIsSubmitted(true);
       
       setTimeout(() => {
@@ -123,7 +103,7 @@ const EarlyAccessSection: React.FC = () => {
             Seja o primeiro a <span className="text-[#F28500]">experimentar</span>
           </h3>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Registre-se agora para ter acesso antecipado ao Maestro e simplifique o processo DevOps da sua equipe antes de todos.
+            Faça parte do programa de acesso antecipado e seja o primeiro a experimentar o Maestro. Inscreva-se para ser notificado assim que o produto for lançado.
           </p>
         </motion.div>
         
