@@ -1,7 +1,6 @@
 "use client"
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { colors } from '../app/styles/colors';
 
 const EarlyAccessSection: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -36,7 +35,6 @@ const EarlyAccessSection: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Chamar a API para enviar o email
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
@@ -51,14 +49,12 @@ const EarlyAccessSection: React.FC = () => {
         throw new Error(data.error || 'Erro ao enviar o email');
       }
       
-      // Atualizar o nome do usuário com o retorno da API (mais confiável)
       if (data.userName) {
         setUserName(data.userName);
       }
       
       setIsSubmitted(true);
       
-      // Reset state after showing success message for a while
       setTimeout(() => {
         setIsSubmitted(false);
         setEmail('');

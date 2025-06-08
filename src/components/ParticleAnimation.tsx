@@ -90,6 +90,7 @@ const ParticleField = () => {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
+          args={[positions, 3]}
           count={particlesCount}
           array={positions}
           itemSize={3}
